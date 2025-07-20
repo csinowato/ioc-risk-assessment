@@ -1,0 +1,22 @@
+# IOC Enrichment Pipeline - .gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+
+# Testing
+.pytest_cache/
+.coverage
+
+# IDEs
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
