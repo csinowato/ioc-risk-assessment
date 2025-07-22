@@ -5,6 +5,7 @@ from typing import Optional
 class Settings(BaseSettings):
     # API Configuration
     PROJECT_NAME: str = "IOC Enrichment Tool"
+    VERSION: str = "1.0.0"
     DEBUG: bool = True
 
     # CORS Settings
