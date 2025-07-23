@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     # CORS Settings
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
+    ALLOWED_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     # External API Keys
     VIRUSTOTAL_API_KEY: Optional[str] = None
