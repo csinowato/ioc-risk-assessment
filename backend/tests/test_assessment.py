@@ -1,12 +1,10 @@
 import pytest
-import asyncio
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch
 from datetime import datetime
 
-from app.services.enrichment import (
-    enrich_single_ioc,
-    enrich_multiple_iocs,
-    export_results_json,
+from app.services.assessment import (
+    assess_single_ioc,
+    assess_multiple_iocs,
 )
 from app.services.external_apis import query_virustotal, query_abuseipdb, query_ipinfo
 from app.models import SourceResult, IOCResult
@@ -65,12 +63,12 @@ class TestExternalAPIFunctions:
 
 
 @patch.object(settings, "DEBUG", True)  # force mocks for all tests in this class
-class TestEnrichmentCore:
-    """Test core enrichment logic"""
+class TestAssessmentCore:
+    """Test core assessment logic"""
 
     @pytest.mark.asyncio
-    async def test_enrich_single_ioc_structure(self):
-        result = await enrich_single_ioc("8.8.8.8")
+    async def test_assess_single_ioc_structure(self):
+        result = await assess_single_ioc("8.8.8.8")
 
         # Test return type and required fields
         assert isinstance(result, IOCResult)
@@ -84,28 +82,28 @@ class TestEnrichmentCore:
         assert result.timestamp is not None
 
     @pytest.mark.asyncio
-    async def test_enrich_single_ioc_sanitization(self):
+    async def test_assess_single_ioc_sanitization(self):
         """Test that IOCs are properly sanitized"""
-        result = await enrich_single_ioc("https://google.com/path")
+        result = await assess_single_ioc("https://google.com/path")
         assert result.ioc == "google.com"  # should strip URL components
         assert result.ioc_type == "domain"
 
     @pytest.mark.asyncio
-    async def test_enrich_single_ioc_source_coverage(self):
+    async def test_assess_single_ioc_source_coverage(self):
         """Test that all expected sources are queried"""
-        result = await enrich_single_ioc("192.168.1.1")
+        result = await assess_single_ioc("192.168.1.1")
 
         source_names = {source.source for source in result.sources}
         expected_sources = {"VirusTotal", "AbuseIPDB", "IPInfo"}
         assert source_names == expected_sources
 
     @pytest.mark.asyncio
-    async def test_enrich_multiple_iocs_parallel(self):
+    async def test_assess_multiple_iocs_parallel(self):
         """Test that multiple IOCs are processed in parallel"""
         iocs = ["8.8.8.8", "google.com", "d41d8cd98f00b204e9800998ecf8427e"]
 
         start_time = datetime.now()
-        results = await enrich_multiple_iocs(iocs)
+        results = await assess_multiple_iocs(iocs)
         end_time = datetime.now()
 
         # Should complete faster than sequential processing
@@ -122,10 +120,10 @@ class TestEnrichmentCore:
         assert result_iocs == expected_iocs
 
     @pytest.mark.asyncio
-    async def test_enrich_multiple_iocs_empty_handling(self):
+    async def test_assess_multiple_iocs_empty_handling(self):
         """Test handling of empty and invalid IOCs"""
         iocs = ["", "   ", "8.8.8.8", ""]
-        results = await enrich_multiple_iocs(iocs)
+        results = await assess_multiple_iocs(iocs)
 
         # Should filter out empty IOCs
         assert len(results) == 1
