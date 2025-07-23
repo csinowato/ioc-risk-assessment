@@ -83,7 +83,7 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
       
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 IOC (Defanged)
