@@ -1,9 +1,13 @@
 import React from 'react';
-import { AlertTriangle, Clock, ChevronDown, ChevronRight, Database } from 'lucide-react';
+import { AlertTriangle, Clock, ChevronDown, ChevronRight, Database, Download } from 'lucide-react';
 import { defangIOC } from '../utils/defang';
 import { getRiskColor, getRiskIcon } from '../utils/riskScoring';
+import { exportResultsAsJSON } from '../utils/api';
 
 const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
+  const handleExport = () => {
+    exportResultsAsJSON(results);
+  };
   // Error display
   if (error) {
     return (
@@ -60,11 +64,20 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <Clock size={16} className="text-gray-500" />
-          <h2 className="text-lg font-semibold text-gray-900">
-            Analysis Results ({results.length} IOCs)
-          </h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock size={16} className="text-gray-500" />
+            <h2 className="text-lg font-semibold text-gray-900">
+              Analysis Results ({results.length} IOCs)
+            </h2>
+          </div>
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 border border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400 bg-white px-3 py-2 rounded-lg text-sm transition-colors min-w-[120px] justify-center"
+          >
+            <Download size={16} />
+            Export
+          </button>
         </div>
       </div>
       
@@ -82,7 +95,7 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
                 Risk
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Sources
+                Summary
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Details
@@ -109,24 +122,18 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-sm text-gray-900">
-                    {result.sources?.length || 0}
+                  <td className="px-4 py-4 text-sm text-gray-700">
+                    {result.summary || 'No summary available'}
                   </td>
                   <td className="px-4 py-4 text-sm">
                     <button
                       onClick={() => onToggleExpansion(result.ioc)}
-                      className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                      className="flex items-center justify-center w-6 h-6 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded cursor-pointer transition-colors"
                     >
                       {expandedRows.has(result.ioc) ? (
-                        <>
-                          <ChevronDown size={16} />
-                          Hide Details
-                        </>
+                        <ChevronDown size={16} strokeWidth={3} />
                       ) : (
-                        <>
-                          <ChevronRight size={16} />
-                          Show Details
-                        </>
+                        <ChevronRight size={16} strokeWidth={3} />
                       )}
                     </button>
                   </td>
@@ -137,12 +144,6 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
                   <tr>
                     <td colSpan="5" className="px-4 pb-4 bg-gray-50">
                       <div className="space-y-2">
-                        {result.summary && (
-                          <div className="p-3 bg-white rounded border text-sm text-gray-700">
-                            <strong>Summary:</strong> {result.summary}
-                          </div>
-                        )}
-                        
                         {result.sources && result.sources.length > 0 ? (
                           <div className="bg-white rounded border p-3">
                             <h4 className="font-medium text-gray-900 mb-2">Source Details:</h4>

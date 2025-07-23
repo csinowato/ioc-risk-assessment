@@ -20,7 +20,7 @@ const IOCInput = ({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="8.8.8.8&#10;google.com&#10;malicious-hash"
-          className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+          className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-100 focus:border-sky-400 focus:outline-none font-mono text-sm"
           disabled={isLoading}
         />
         
@@ -46,7 +46,7 @@ const IOCInput = ({
           <button
             onClick={onSubmit}
             disabled={!canSubmit}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="bg-slate-500 text-white px-6 py-2 rounded-lg hover:bg-slate-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors min-w-[120px] justify-center"
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
@@ -54,7 +54,7 @@ const IOCInput = ({
                 Analyzing...
               </div>
             ) : (
-              'Analyze IOCs'
+              'Analyze'
             )}
           </button>
         </div>
