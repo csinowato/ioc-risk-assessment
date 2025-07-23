@@ -6,7 +6,7 @@ const API_BASE_URL = "http://localhost:8000";
  * @returns {Promise} - API response data
  */
 export const analyzeIOCs = async (iocs) => {
-  const response = await fetch(`${API_BASE_URL}/api/enrich`, {
+  const response = await fetch(`${API_BASE_URL}/api/assess`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -32,7 +32,7 @@ class IOCResult(BaseModel):
     timestamp: str
 
 
-class EnrichmentResponse(BaseModel):
+class AssessmentResponse(BaseModel):
     results: List[IOCResult]
     total_processed: int
     processing_time: float

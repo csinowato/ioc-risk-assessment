@@ -1,5 +1,3 @@
-# IOC Enrichment Pipeline - .gitignore
-
 # Python
 __pycache__/
 *.pyc

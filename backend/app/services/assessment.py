@@ -7,8 +7,8 @@ from app.risk_scoring import calculate_risk_score, generate_summary
 from app.services.external_apis import query_virustotal, query_abuseipdb, query_ipinfo
 
 
-async def enrich_single_ioc(ioc: str) -> IOCResult:
-    """Enrich a single IOC by querying all sources"""
+async def assess_single_ioc(ioc: str) -> IOCResult:
+    """Assess a single IOC by querying all sources"""
     # Clean and validate the IOC
     clean_ioc = sanitize_ioc(ioc)
     ioc_type = detect_ioc_type(clean_ioc)
@@ -54,15 +54,15 @@ async def enrich_single_ioc(ioc: str) -> IOCResult:
     )
 
 
-async def enrich_multiple_iocs(iocs: List[str]) -> List[IOCResult]:
-    """Enrich multiple IOCs in parallel"""
+async def assess_multiple_iocs(iocs: List[str]) -> List[IOCResult]:
+    """Assess multiple IOCs in parallel"""
     # Filter out empty or invalid IOCs
     valid_iocs = [ioc.strip() for ioc in iocs if ioc.strip()]
     if not valid_iocs:
         return []
 
     # Process all IOCs in parallel for performance
-    tasks = [enrich_single_ioc(ioc) for ioc in valid_iocs]
+    tasks = [assess_single_ioc(ioc) for ioc in valid_iocs]
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
     # Filter out exceptions (defensive programming - shouldn't happen)
@@ -82,5 +82,5 @@ def export_results_json(results: List[IOCResult]) -> dict:
         "export_timestamp": datetime.now().isoformat(),
         "total_iocs": len(results),
         "results": [result.model_dump() for result in results],
-        "metadata": {"tool": "IOC Enrichment Tool", "version": "1.0.0"},
+        "metadata": {"tool": "IOC Risk Assessment Tool", "version": "1.0.0"},
     }

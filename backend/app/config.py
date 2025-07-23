@@ -4,7 +4,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # API Configuration
-    PROJECT_NAME: str = "IOC Enrichment Tool"
+    PROJECT_NAME: str = "IOC Risk Assessment Tool"
     VERSION: str = "1.0.0"
     DEBUG: bool = True
 

@@ -7,7 +7,7 @@ from app.api.routes import router
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="A threat intelligence enrichment tool for IOCs (IPs, domains, hashes)",
+    description="A risk assessment tool for IOCs (IPs, domains, hashes)",
     openapi_url="/api/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
