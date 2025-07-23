@@ -17,12 +17,17 @@ def calculate_virustotal_risk(vt_data: dict) -> int:
         return 20  # any detection is worth investigating
     elif positives <= 3:
         return 35  # suspicious
+    elif positives <= 6:
+        return 50  # concerning
     elif positives <= 10:
-        return 60  # likely malicious
+        return 65  # likely malicious
     else:
-        # High confidence malicious: start at 70%, add up to 25% more based on ratio
-        ratio_score = (positives / total) * 25
-        return min(95, 70 + ratio_score)
+        try:
+            # High confidence malicious: start at 70%, add up to 25% more based on ratio
+            ratio_score = (positives / total) * 25
+            return min(95, 70 + ratio_score)
+        except (ZeroDivisionError, TypeError):
+            return 85  # fallback if total is 0 or None
 
 
 def calculate_abuseipdb_risk(abuse_data: dict) -> int:
@@ -38,6 +43,10 @@ def calculate_ipinfo_risk(ipinfo_data: dict) -> int:
     # Check for bulletproof hosting (highest risk)
     if any(term in org for term in SUSPICIOUS_HOSTING):
         return 40
+
+    # Check for Tor exit nodes
+    if "tor" in org:
+        return 35
 
     # Check for high-risk countries
     if country in HIGH_RISK_COUNTRIES:
