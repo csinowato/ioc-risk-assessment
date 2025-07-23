@@ -1,7 +1,6 @@
-import React from 'react';
-import { AlertTriangle, Clock, Database, Download } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertTriangle, Clock, Database } from 'lucide-react';
 import DOMPurify from 'dompurify';
-import { exportResultsAsJSON } from '../utils/api';
 import DesktopResultsTable from './DesktopResultsTable';
 import MobileResultsTable from './MobileResultsTable';
 
@@ -37,14 +36,7 @@ const sanitizeContent = (content) => {
 };
 
 const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
-  const handleExport = () => {
-    // Validate results before export
-    if (!validateResults(results)) {
-      console.error('Cannot export invalid results data');
-      return;
-    }
-    exportResultsAsJSON(results);
-  };
+  const [viewMode, setViewMode] = useState('table'); // 'table' or 'json'
 
   // Error display with sanitization
   if (error) {
@@ -157,7 +149,7 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Main Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock size={16} className="text-gray-500" />
@@ -165,38 +157,66 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
               Analysis Results ({results.length} IOCs)
             </h2>
           </div>
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-2 border border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400 bg-white px-3 py-2 rounded-lg text-sm transition-colors min-w-[120px] justify-center"
-          >
-            <Download size={16} />
-            Export
-          </button>
+          <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden" style={{ width: '140px' }}>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`text-sm font-medium transition-colors ${
+                viewMode === 'table' 
+                  ? 'bg-slate-500 text-white' 
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+              style={{ width: '70px', padding: '8px 4px' }}
+            >
+              Table
+            </button>
+            <button
+              onClick={() => setViewMode('json')}
+              className={`text-sm font-medium transition-colors ${
+                viewMode === 'json' 
+                  ? 'bg-slate-500 text-white' 
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+              style={{ width: '70px', padding: '8px 4px' }}
+            >
+              JSON
+            </button>
+          </div>
         </div>
       </div>
       
-      {/* Desktop Table View */}
-      <div className="hidden md:block">
-        <DesktopResultsTable
-          results={results}
-          expandedRows={expandedRows}
-          onToggleExpansion={onToggleExpansion}
-          renderSourceData={renderSourceData}
-        />
-      </div>
+      {viewMode === 'table' ? (
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <DesktopResultsTable
+              results={results}
+              expandedRows={expandedRows}
+              onToggleExpansion={onToggleExpansion}
+              renderSourceData={renderSourceData}
+            />
+          </div>
 
-      {/* Mobile Card View */}
-      <div className="md:hidden p-4 space-y-4">
-        {results.map((result, idx) => (
-          <MobileResultsTable
-            key={idx}
-            result={result}
-            expandedRows={expandedRows}
-            onToggleExpansion={onToggleExpansion}
-            renderSourceData={renderSourceData}
-          />
-        ))}
-      </div>
+          {/* Mobile Card View */}
+          <div className="md:hidden p-4 space-y-4">
+            {results.map((result, idx) => (
+              <MobileResultsTable
+                key={idx}
+                result={result}
+                expandedRows={expandedRows}
+                onToggleExpansion={onToggleExpansion}
+                renderSourceData={renderSourceData}
+              />
+            ))}
+          </div>
+        </>
+      ) : (
+        /* JSON View */
+        <div className="p-4">
+          <pre className="bg-gray-100 p-4 rounded text-xs overflow-auto max-h-96 whitespace-pre-wrap border">
+            {JSON.stringify(results, null, 2)}
+          </pre>
+        </div>
+      )}
     </div>
   );
 };

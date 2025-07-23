@@ -46,7 +46,7 @@ const IOCInput = ({
           <button
             onClick={onSubmit}
             disabled={!canSubmit}
-            className="bg-slate-500 text-white px-6 py-2 rounded-lg hover:bg-slate-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors min-w-[120px] justify-center text-sm"
+            className="bg-slate-500 text-white px-6 py-2 rounded-lg hover:bg-slate-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors min-w-[140px] justify-center text-sm"
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
