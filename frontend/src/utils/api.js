@@ -20,23 +20,3 @@ export const analyzeIOCs = async (iocs) => {
 
   return await response.json();
 };
-
-/**
- * Export results as JSON file
- * @param {Array} results - Analysis results to export
- */
-export const exportResultsAsJSON = (results) => {
-  const timestamp = new Date().toISOString().slice(0, 19);
-  const filename = `ioc-analysis-${timestamp}.json`;
-
-  const dataStr = JSON.stringify(results, null, 2);
-  const dataBlob = new Blob([dataStr], { type: "application/json" });
-  const url = URL.createObjectURL(dataBlob);
-
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-
-  setTimeout(() => URL.revokeObjectURL(url), 100);
-};
