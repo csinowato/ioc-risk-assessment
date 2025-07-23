@@ -52,10 +52,6 @@ def calculate_ipinfo_risk(ipinfo_data: dict) -> int:
     if country in HIGH_RISK_COUNTRIES:
         return 15
 
-    # Regular hosting/cloud providers
-    if any(term in org for term in ["hosting", "server", "cloud"]):
-        return 10
-
     return 0
 
 
