@@ -5,7 +5,7 @@ IOCType = Literal["ip", "domain", "md5", "sha1", "sha256", "unknown"]
 
 # Regex patterns
 IPV4_PATTERN = r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-DOMAIN_PATTERN = r"^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+DOMAIN_PATTERN = r"^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$"
 HEX_PATTERN = r"^[a-fA-F0-9]+$"
 
 
