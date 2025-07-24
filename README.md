@@ -21,7 +21,9 @@ A risk assessment tool that analyzes Indicators of Compromise (IOCs) and provide
 
 ## 🚀 Live Demo
 
-<!-- TODO  -->
+<!-- TODO  --> URL
+
+⚠️ **Note:** This tool uses free tier APIs - multiple IOCs will be processed slowly due to rate limiting.
 
 **Quick Test:**
 

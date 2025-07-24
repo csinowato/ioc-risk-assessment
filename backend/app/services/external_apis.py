@@ -29,6 +29,134 @@ class ExternalAPIClient:
             await self.session.close()
 
 
+async def query_virustotal(ioc: str, ioc_type: str) -> SourceResult:
+    """Query VirusTotal API - uses mocks in DEBUG mode, real API otherwise"""
+    await asyncio.sleep(0.1)  # simulate API delay
+
+    if settings.DEBUG:
+        # Use mocks in DEBUG mode
+        return _get_mock_vt_response(ioc, ioc_type)
+    else:
+        # Production mode - use real API key
+        if not settings.VIRUSTOTAL_API_KEY:
+            return SourceResult(
+                source="VirusTotal",
+                status="error",
+                error="VirusTotal API key not configured",
+            )
+
+        # VirusTotal API integration
+        headers = {"x-apikey": settings.VIRUSTOTAL_API_KEY}
+
+        # Determine correct endpoint based on IOC type
+        if ioc_type == "domain":
+            url = f"https://www.virustotal.com/api/v3/domains/{ioc}"
+        elif ioc_type == "ip":
+            url = f"https://www.virustotal.com/api/v3/ip_addresses/{ioc}"
+        elif ioc_type in ["md5", "sha1", "sha256"]:
+            url = f"https://www.virustotal.com/api/v3/files/{ioc}"
+        else:
+            return SourceResult(
+                source="VirusTotal",
+                status="error",
+                error=f"Unsupported IOC type: {ioc_type}",
+            )
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return SourceResult(
+                        source="VirusTotal", status="success", data=data
+                    )
+                else:
+                    return SourceResult(
+                        source="VirusTotal",
+                        status="error",
+                        error=f"API returned {response.status}",
+                    )
+
+
+async def query_abuseipdb(ioc: str, ioc_type: str) -> SourceResult:
+    """Query AbuseIPDB API - uses mocks in DEBUG mode, real API otherwise"""
+    await asyncio.sleep(0.1)
+
+    if settings.DEBUG:
+        # Use mocks in DEBUG mode
+        return _get_mock_abuseipdb_response(ioc, ioc_type)
+    else:
+        # Production mode - use real API key
+        if not settings.ABUSEIPDB_API_KEY:
+            return SourceResult(
+                source="AbuseIPDB",
+                status="error",
+                error="AbuseIPDB API key not configured",
+            )
+
+        # AbuseIPDB only supports IP addresses
+        if ioc_type != "ip":
+            return SourceResult(
+                source="AbuseIPDB",
+                status="not_applicable",
+                data=ABUSEIPDB_NOT_APPLICABLE,
+            )
+
+        # AbuseIPDB API integration for IPs
+        headers = {"Key": settings.ABUSEIPDB_API_KEY, "Accept": "application/json"}
+        url = "https://api.abuseipdb.com/api/v2/check"
+        params = {"ipAddress": ioc, "maxAgeInDays": 90}
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return SourceResult(source="AbuseIPDB", status="success", data=data)
+                else:
+                    return SourceResult(
+                        source="AbuseIPDB",
+                        status="error",
+                        error=f"API returned {response.status}",
+                    )
+
+
+async def query_ipinfo(ioc: str, ioc_type: str) -> SourceResult:
+    """Query IPInfo API - uses mocks in DEBUG mode, real API otherwise"""
+    await asyncio.sleep(0.1)
+
+    if settings.DEBUG:
+        # Use mocks in DEBUG mode
+        return _get_mock_ipinfo_response(ioc, ioc_type)
+    else:
+        # Production mode - use real API key
+        if not settings.IPINFO_API_KEY:
+            return SourceResult(
+                source="IPInfo",
+                status="error",
+                error="IPInfo API key not configured",
+            )
+
+        # IPInfo supports both IPs and domains so handle unsupported types
+        if ioc_type not in ["ip", "domain"]:
+            return SourceResult(
+                source="IPInfo", status="not_applicable", data=IPINFO_NOT_APPLICABLE
+            )
+
+        # IPInfo API integration
+        headers = {"Accept": "application/json"}
+        url = f"https://ipinfo.io/{ioc}/json?token={settings.IPINFO_API_KEY}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return SourceResult(source="IPInfo", status="success", data=data)
+                else:
+                    return SourceResult(
+                        source="IPInfo",
+                        status="error",
+                        error=f"API returned {response.status}",
+                    )
+
+
+# Mock functions for development/testing
 def _get_mock_vt_response(ioc: str, ioc_type: str) -> SourceResult:
     """Get mock VirusTotal response for development"""
     is_test_malicious = "malicious" in ioc.lower() or ioc in MALICIOUS_TEST_IOCS
@@ -74,80 +202,3 @@ def _get_mock_ipinfo_response(ioc: str, ioc_type: str) -> SourceResult:
         return SourceResult(
             source="IPInfo", status="not_applicable", data=IPINFO_NOT_APPLICABLE
         )
-
-
-async def query_virustotal(ioc: str, ioc_type: str) -> SourceResult:
-    """Query VirusTotal API - uses real API if key available, otherwise uses mocks"""
-    await asyncio.sleep(0.1)  # simulate API delay
-
-    if settings.VIRUSTOTAL_API_KEY and not settings.DEBUG:
-        # TODO: Real VirusTotal API implementation
-        # headers = {"x-apikey": settings.VIRUSTOTAL_API_KEY}
-        # url = f"https://www.virustotal.com/api/v3/files/{ioc}"  # v3 endpoint
-        # async with aiohttp.ClientSession() as session:
-        #     async with session.get(url, headers=headers) as response:
-        #         if response.status == 200:
-        #             data = await response.json()
-        #             return SourceResult(
-        #                 source="VirusTotal", status="success", data=data
-        #             )
-        #         else:
-        #             return SourceResult(
-        #                 source="VirusTotal",
-        #                 status="error",
-        #                 error=f"API returned {response.status}",
-        #             )
-        return _get_mock_vt_response(ioc, ioc_type)
-    else:
-        # Use mocks in DEBUG mode or when no API key is present
-        return _get_mock_vt_response(ioc, ioc_type)
-
-
-async def query_abuseipdb(ioc: str, ioc_type: str) -> SourceResult:
-    """Query AbuseIPDB API - uses real API if key available, otherwise uses mocks"""
-    await asyncio.sleep(0.1)
-
-    if settings.ABUSEIPDB_API_KEY and ioc_type == "ip" and not settings.DEBUG:
-        # TODO: Real AbuseIPDB API implementation
-        # headers = {"Key": settings.ABUSEIPDB_API_KEY}
-        # url = "https://api.abuseipdb.com/api/v2/check"
-        # params = {"ipAddress": ioc, "maxAgeInDays": 90}
-        # async with aiohttp.ClientSession() as session:
-        #     async with session.get(url, headers=headers, params=params) as response:
-        #         if response.status == 200:
-        #             data = await response.json()
-        #             return SourceResult(source="AbuseIPDB", status="success", data=data)
-        #         else:
-        #             return SourceResult(
-        #                 source="AbuseIPDB",
-        #                 status="error",
-        #                 error=f"API returned {response.status}",
-        #             )
-        return _get_mock_abuseipdb_response(ioc, ioc_type)
-    else:
-        # Use mocks in DEBUG mode, or when no API key is present, or for non-IP IOCs
-        return _get_mock_abuseipdb_response(ioc, ioc_type)
-
-
-async def query_ipinfo(ioc: str, ioc_type: str) -> SourceResult:
-    """Query IPInfo API - uses real API if key available, otherwise uses mocks"""
-    await asyncio.sleep(0.1)
-
-    if settings.IPINFO_API_KEY and not settings.DEBUG:
-        # TODO: Real IPInfo API implementation
-        # url = f"https://ipinfo.io/{ioc}/json?token={settings.IPINFO_API_KEY}"
-        # async with aiohttp.ClientSession() as session:
-        #     async with session.get(url) as response:
-        #         if response.status == 200:
-        #             data = await response.json()
-        #             return SourceResult(source="IPInfo", status="success", data=data)
-        #         else:
-        #             return SourceResult(
-        #                 source="IPInfo",
-        #                 status="error",
-        #                 error=f"API returned {response.status}",
-        #             )
-        return _get_mock_ipinfo_response(ioc, ioc_type)
-    else:
-        # Use mocks in DEBUG mode or when no API key is present
-        return _get_mock_ipinfo_response(ioc, ioc_type)
