@@ -3,26 +3,40 @@ MALICIOUS_TEST_IOCS = ["1.1.1.1", "suspicious-domain.com"]
 
 # VirusTotal mock responses
 VT_MALICIOUS_RESPONSE = {
-    "positives": 5,
-    "total": 70,
-    "scan_date": "2025-07-20",
-    "permalink": "https://virustotal.com/gui/{ioc_type}/{ioc}",
-    "scans": {
-        "Kaspersky": {"detected": True, "result": "Malware.Generic"},
-        "Symantec": {"detected": True, "result": "Suspicious.Cloud.9"},
-    },
+    "data": {
+        "attributes": {
+            "last_analysis_stats": {
+                "malicious": 5,
+                "suspicious": 0,
+                "harmless": 60,
+                "undetected": 5,
+            },
+            "date": 1721472000,  # Unix timestamp for 2025-07-20
+            "last_analysis_results": {
+                "Kaspersky": {"category": "malicious", "result": "Malware.Generic"},
+                "Symantec": {"category": "malicious", "result": "Suspicious.Cloud.9"},
+            },
+        }
+    }
 }
 
 VT_CLEAN_RESPONSE = {
-    "positives": 0,
-    "total": 70,
-    "scan_date": "2025-07-20",
-    "permalink": "https://virustotal.com/gui/{ioc_type}/{ioc}",
+    "data": {
+        "attributes": {
+            "last_analysis_stats": {
+                "malicious": 0,
+                "suspicious": 0,
+                "harmless": 68,
+                "undetected": 2,
+            },
+            "date": 1721472000,  # Unix timestamp for 2025-07-20
+        }
+    }
 }
 
 # AbuseIPDB mock responses
 ABUSEIPDB_MALICIOUS_RESPONSE = {
-    "abuseConfidencePercentage": 85,
+    "abuseConfidenceScore": 85,
     "countryCode": "US",
     "usageType": "Data Center/Web Hosting/Transit",
     "isp": "Example ISP",
@@ -31,7 +45,7 @@ ABUSEIPDB_MALICIOUS_RESPONSE = {
 }
 
 ABUSEIPDB_CLEAN_RESPONSE = {
-    "abuseConfidencePercentage": 0,
+    "abuseConfidenceScore": 0,
     "countryCode": "US",
     "usageType": "Data Center/Web Hosting/Transit",
     "isp": "Example ISP",

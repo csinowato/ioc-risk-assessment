@@ -16,15 +16,95 @@ class TestVirusTotalRisk:
 
     def test_detection_ranges(self):
         """Test key VT detection ranges"""
-        assert calculate_virustotal_risk({"positives": 0, "total": 50}) == 0
-        assert calculate_virustotal_risk({"positives": 1, "total": 50}) == 20
-        assert calculate_virustotal_risk({"positives": 5, "total": 50}) == 50
-        assert calculate_virustotal_risk({"positives": 20, "total": 50}) == 80
+        assert (
+            calculate_virustotal_risk(
+                {
+                    "data": {
+                        "attributes": {
+                            "last_analysis_stats": {
+                                "malicious": 0,
+                                "suspicious": 0,
+                                "harmless": 40,
+                                "undetected": 10,
+                            }
+                        }
+                    }
+                }
+            )
+            == 0
+        )
+        assert (
+            calculate_virustotal_risk(
+                {
+                    "data": {
+                        "attributes": {
+                            "last_analysis_stats": {
+                                "malicious": 1,
+                                "suspicious": 0,
+                                "harmless": 40,
+                                "undetected": 9,
+                            }
+                        }
+                    }
+                }
+            )
+            == 20
+        )
+        assert (
+            calculate_virustotal_risk(
+                {
+                    "data": {
+                        "attributes": {
+                            "last_analysis_stats": {
+                                "malicious": 5,
+                                "suspicious": 0,
+                                "harmless": 35,
+                                "undetected": 10,
+                            }
+                        }
+                    }
+                }
+            )
+            == 50
+        )
+        assert (
+            calculate_virustotal_risk(
+                {
+                    "data": {
+                        "attributes": {
+                            "last_analysis_stats": {
+                                "malicious": 20,
+                                "suspicious": 0,
+                                "harmless": 20,
+                                "undetected": 10,
+                            }
+                        }
+                    }
+                }
+            )
+            == 80
+        )
 
     def test_edge_cases(self):
         """Test VT edge cases"""
         assert calculate_virustotal_risk({}) == 0
-        assert calculate_virustotal_risk({"positives": 15, "total": 0}) == 85
+        assert (
+            calculate_virustotal_risk(
+                {
+                    "data": {
+                        "attributes": {
+                            "last_analysis_stats": {
+                                "malicious": 15,
+                                "suspicious": 0,
+                                "harmless": 0,
+                                "undetected": 0,
+                            }
+                        }
+                    }
+                }
+            )
+            == 95
+        )
 
 
 class TestAbuseIPDBRisk:
@@ -33,7 +113,7 @@ class TestAbuseIPDBRisk:
     def test_confidence_scoring(self):
         """Test abuse confidence mapping"""
         assert calculate_abuseipdb_risk({}) == 0
-        assert calculate_abuseipdb_risk({"abuseConfidencePercentage": 75}) == 75
+        assert calculate_abuseipdb_risk({"abuseConfidenceScore": 75}) == 75
 
 
 class TestIPInfoRisk:
@@ -59,12 +139,23 @@ class TestRiskScoreCalculation:
             Mock(
                 source="VirusTotal",
                 status="success",
-                data={"positives": 10, "total": 50},
+                data={
+                    "data": {
+                        "attributes": {
+                            "last_analysis_stats": {
+                                "malicious": 10,
+                                "suspicious": 0,
+                                "harmless": 30,
+                                "undetected": 10,
+                            }
+                        }
+                    }
+                },
             ),  # 65
             Mock(
                 source="AbuseIPDB",
                 status="success",
-                data={"abuseConfidencePercentage": 60},
+                data={"abuseConfidenceScore": 60},
             ),  # 60
             Mock(
                 source="IPInfo",
@@ -101,12 +192,23 @@ class TestSummaryGeneration:
             Mock(
                 source="VirusTotal",
                 status="success",
-                data={"positives": 5, "total": 50},
+                data={
+                    "data": {
+                        "attributes": {
+                            "last_analysis_stats": {
+                                "malicious": 5,
+                                "suspicious": 0,
+                                "harmless": 35,
+                                "undetected": 10,
+                            }
+                        }
+                    }
+                },
             ),
             Mock(
                 source="AbuseIPDB",
                 status="success",
-                data={"abuseConfidencePercentage": 30},
+                data={"abuseConfidenceScore": 30},
             ),
         ]
 

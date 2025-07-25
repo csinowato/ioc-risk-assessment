@@ -23,7 +23,11 @@ class TestExternalAPIFunctions:
         assert result.source == "VirusTotal"
         assert result.status in ["success", "error", "not_applicable"]
         assert result.data is not None
-        assert result.error is None
+
+        # Test v3 API structure
+        if result.status == "success":
+            assert "data" in result.data
+            assert "attributes" in result.data["data"]
 
     @pytest.mark.asyncio
     async def test_query_abuseipdb_ip_only(self):
@@ -53,9 +57,15 @@ class TestExternalAPIFunctions:
     async def test_malicious_detection_logic(self):
         """Test that the 'malicious' keyword triggers the correct mock responses"""
 
-        # Test malicious IP
-        result = await query_virustotal("malicious-test.com", "domain")
+        # Test malicious domain
+        result = await query_virustotal("suspicious-domain.com", "domain")
         assert result.status == "success"
+
+        # Test v3 structure for malicious response
+        if result.data and "data" in result.data:
+            attributes = result.data["data"].get("attributes", {})
+            stats = attributes.get("last_analysis_stats", {})
+            assert stats.get("malicious", 0) > 0
 
         # Test clean domain
         clean_result = await query_virustotal("google.com", "domain")

@@ -163,11 +163,9 @@ def _get_mock_vt_response(ioc: str, ioc_type: str) -> SourceResult:
 
     if is_test_malicious:
         data = VT_MALICIOUS_RESPONSE.copy()
-        data["permalink"] = data["permalink"].format(ioc_type=ioc_type, ioc=ioc)
         return SourceResult(source="VirusTotal", status="success", data=data)
     else:
         data = VT_CLEAN_RESPONSE.copy()
-        data["permalink"] = data["permalink"].format(ioc_type=ioc_type, ioc=ioc)
         return SourceResult(source="VirusTotal", status="success", data=data)
 
 
