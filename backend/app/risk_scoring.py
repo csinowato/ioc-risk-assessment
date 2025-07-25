@@ -8,8 +8,16 @@ HIGH_RISK_COUNTRIES = ["RU", "CN", "KP", "IR"]
 
 def calculate_virustotal_risk(vt_data: dict) -> int:
     """Calculate risk score from VirusTotal data using non-linear scaling"""
-    positives = vt_data.get("positives", 0)
-    total = vt_data.get("total", 1)
+    attributes = vt_data.get("data", {}).get("attributes", {})
+    stats = attributes.get("last_analysis_stats", {})
+
+    positives = stats.get("malicious", 0) + stats.get("suspicious", 0)
+    total = (
+        stats.get("malicious", 0)
+        + stats.get("suspicious", 0)
+        + stats.get("harmless", 0)
+        + stats.get("undetected", 0)
+    )
 
     if positives == 0:
         return 0
@@ -32,7 +40,7 @@ def calculate_virustotal_risk(vt_data: dict) -> int:
 
 def calculate_abuseipdb_risk(abuse_data: dict) -> int:
     """AbuseIPDB confidence is already a good risk indicator"""
-    return abuse_data.get("abuseConfidencePercentage", 0)
+    return abuse_data.get("abuseConfidenceScore", 0)
 
 
 def calculate_ipinfo_risk(ipinfo_data: dict) -> int:
@@ -103,16 +111,26 @@ def generate_summary(
     context = []
     for source in sources:
         if source.status == "success" and source.data:
-            if source.source == "VirusTotal" and source.data.get("positives", 0) > 0:
-                context.append(
-                    f"detected by {source.data['positives']}/{source.data['total']} engines"
+            if source.source == "VirusTotal":
+                attributes = source.data.get("data", {}).get("attributes", {})
+                stats = attributes.get("last_analysis_stats", {})
+                positives = stats.get("malicious", 0) + stats.get("suspicious", 0)
+                total = (
+                    stats.get("malicious", 0)
+                    + stats.get("suspicious", 0)
+                    + stats.get("harmless", 0)
+                    + stats.get("undetected", 0)
                 )
+
+                if positives > 0:
+                    context.append(f"detected by {positives}/{total} engines")
+
             elif (
                 source.source == "AbuseIPDB"
-                and source.data.get("abuseConfidencePercentage", 0) > 0
+                and source.data.get("abuseConfidenceScore", 0) > 0
             ):
                 context.append(
-                    f"{source.data['abuseConfidencePercentage']}% abuse confidence"
+                    f"{source.data['abuseConfidenceScore']}% abuse confidence"
                 )
 
     context_str = f" ({', '.join(context)})" if context else ""
