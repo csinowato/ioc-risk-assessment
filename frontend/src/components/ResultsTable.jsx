@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { AlertTriangle, Clock, Database } from 'lucide-react';
+import { AlertTriangle, Clock } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import DesktopResultsTable from './DesktopResultsTable';
 import MobileResultsTable from './MobileResultsTable';
+import renderSourceData from '../utils/renderSource';
 
 // Input validation functions
 const validateResults = (results) => {
@@ -12,21 +13,6 @@ const validateResults = (results) => {
     typeof result.ioc_type === 'string' &&
     typeof result.risk_score === 'number'
   );
-};
-
-const validateSource = (source) => {
-  return source &&
-         typeof source.source === 'string' &&
-         typeof source.status === 'string' &&
-         ['success', 'error'].includes(source.status);
-};
-
-// Character escaping function
-const escapeHtml = (text) => {
-  if (typeof text !== 'string') return text;
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
 };
 
 // Safe sanitization wrapper
@@ -88,63 +74,6 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
       </div>
     );
   }
-
-  // Render source data for expanded rows (on desktop and mobile) - with security
-  const renderSourceData = (sources) => {
-    // Validate sources array
-    if (!Array.isArray(sources)) {
-      console.warn('renderSourceData: sources must be an array');
-      return <div className="text-sm text-red-500">Invalid source data</div>;
-    }
-
-    // Filter valid sources
-    const validSources = sources.filter(validateSource);
-    
-    if (validSources.length !== sources.length) {
-      console.warn(`renderSourceData: Filtered out ${sources.length - validSources.length} invalid sources`);
-    }
-
-    return validSources.map((source, idx) => (
-      <div key={idx} className="py-2 border-t border-gray-100 text-sm">
-        <div className="flex items-center gap-2 mb-1">
-          <Database size={14} className="text-gray-500" />
-          <span className="font-medium text-gray-700">
-            {escapeHtml(source.source)}
-          </span>
-          <span className={`px-2 py-0.5 rounded text-xs ${
-            source.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-          }`}>
-            {escapeHtml(source.status)}
-          </span>
-        </div>
-        
-        {source.status === 'success' && source.data && typeof source.data === 'object' && (
-          <div className="ml-6 text-gray-600">
-            {Object.entries(source.data).map(([key, value]) => (
-              key !== 'permalink' && value !== null && value !== undefined ? (
-                <div key={key} className="flex gap-2">
-                  <span className="capitalize">{escapeHtml(key.replace(/_/g, ' '))}:</span>
-                  <span className="font-mono">
-                    <span dangerouslySetInnerHTML={{
-                      __html: sanitizeContent(String(value))
-                    }} />
-                  </span>
-                </div>
-              ) : null
-            ))}
-          </div>
-        )}
-        
-        {source.status === 'error' && (
-          <div className="ml-6 text-red-600 text-xs">
-            <span dangerouslySetInnerHTML={{
-              __html: sanitizeContent(source.error || 'Unknown error')
-            }} />
-          </div>
-        )}
-      </div>
-    ));
-  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
