@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from app.config import settings
 from app.api.routes import router
 
@@ -38,8 +39,10 @@ async def root():
     }
 
 
-# # Serve static frontend files #TODO
-# app.mount("/", StaticFiles(directory="../frontend/dist", html=True), name="static")
+# Serve static frontend files in production
+frontend_dist = Path("../frontend/dist")
+if frontend_dist.exists() and frontend_dist.is_dir():
+    app.mount("/", StaticFiles(directory="../frontend/dist", html=True), name="static")
 
 
 if __name__ == "__main__":
