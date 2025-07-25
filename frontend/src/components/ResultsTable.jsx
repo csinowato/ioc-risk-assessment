@@ -129,7 +129,7 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
               Analysis Results ({results.length} IOCs)
             </h2>
             {/* Mobile: two line title */}
-            <h2 className="md:hidden text-lg font-semibold text-gray-900">
+            <h2 className="md:hidden text-base font-semibold text-gray-900">
               <div>Analysis Results</div>
               <div>({results.length} IOCs)</div>
             </h2>
