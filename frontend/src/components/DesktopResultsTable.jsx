@@ -120,7 +120,7 @@ const DesktopResultsTable = ({ results, expandedRows, onToggleExpansion, renderS
                     <div className="space-y-2">
                       {result.sources && Array.isArray(result.sources) && result.sources.length > 0 ? (
                         <div className="bg-white rounded border p-3">
-                          <h4 className="font-medium text-gray-900 mb-2">Source Details:</h4>
+                          <h4 className="font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Source Details:</h4>
                           {renderSourceData ? renderSourceData(result.sources) : (
                             <div className="text-sm text-gray-500">No renderSourceData function provided</div>
                           )}

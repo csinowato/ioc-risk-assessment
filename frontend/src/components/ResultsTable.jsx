@@ -4,6 +4,8 @@ import DOMPurify from 'dompurify';
 import DesktopResultsTable from './DesktopResultsTable';
 import MobileResultsTable from './MobileResultsTable';
 import renderSourceData from '../utils/renderSource';
+import SOURCE_FIELD_CONFIGS from '../utils/sourceConfig';
+import { getNestedValue, formatValue } from '../utils/formatting';
 
 // Input validation functions
 const validateResults = (results) => {
@@ -19,6 +21,37 @@ const validateResults = (results) => {
 const sanitizeContent = (content) => {
   if (!content) return '';
   return DOMPurify.sanitize(String(content));
+};
+
+// Transform raw source data to summarized format
+const transformSourceDataForJSON = (sources) => {
+  return sources.map(source => {
+    const config = SOURCE_FIELD_CONFIGS[source.source];
+    
+    // If no config or error status, return basic info
+    if (!config || source.status !== 'success' || !source.data) {
+      return {
+        source: source.source,
+        status: source.status,
+        data: source.status === 'error' ? { error: source.error } : null
+      };
+    }
+    
+    // Extract only the configured fields
+    const summarizedData = {};
+    config.fields.forEach(field => {
+      const value = getNestedValue(source.data, field.key);
+      if (value !== null && value !== undefined) {
+        summarizedData[field.label] = formatValue(value, field.type);
+      }
+    });
+    
+    return {
+      source: source.source,
+      status: source.status,
+      data: summarizedData
+    };
+  });
 };
 
 const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
@@ -74,6 +107,15 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
       </div>
     );
   }
+
+  // Create summarized results for JSON view
+  const summarizedResults = results.map(result => ({
+    ioc: result.ioc,
+    ioc_type: result.ioc_type,
+    risk_score: result.risk_score,
+    summary: result.summary,
+    sources: transformSourceDataForJSON(result.sources || [])
+  }));
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -139,10 +181,10 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
           </div>
         </>
       ) : (
-        /* JSON View */
+        /* JSON View with summarized data */
         <div className="p-4">
           <pre className="bg-gray-100 p-4 rounded text-xs overflow-auto max-h-96 whitespace-pre-wrap border">
-            {JSON.stringify(results, null, 2)}
+            {JSON.stringify(summarizedResults, null, 2)}
           </pre>
         </div>
       )}
