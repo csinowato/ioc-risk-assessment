@@ -1,15 +1,16 @@
 # IOC Risk Assessment Tool
 
-<!-- TODO -->
-
 A risk assessment tool that analyzes Indicators of Compromise (IOCs) and provides real-time security scoring. It analyzes IPs, domains, or file hashes and produces an aggregated, weighted risk assessment, reducing the need to manually cross‑check against multiple threat intelligence sources.
+
+<img src="./frontend/src/assets/demo.png" alt="Demo Screenshot" width="800">
+
+_Example analysis using a mocked malicious domain for demonstration purposes._
 
 ## ⚡ Key Features
 
 - **Multi-Source Intelligence** - Integrates VirusTotal, AbuseIPDB, and IPInfo APIs
 - **Intelligent Risk Scoring** - Weighted algorithm combining detection rates and contextual data
-- **Real-Time Analysis** - Parallel API calls across multiple sources
-- **Bulk Analysis** - Process multiple IOCs simultaneously
+- **Bulk Analysis** - Parallel API calls across multiple sources
 - **Responsive Design** - Optimized for desktop and mobile devices
 
 ## 🛠️ Tech Stack
@@ -21,36 +22,28 @@ A risk assessment tool that analyzes Indicators of Compromise (IOCs) and provide
 
 ## 🚀 Live Demo
 
-<!-- TODO  --> URL
-
 ⚠️ **Note:** This tool uses free tier APIs - multiple IOCs will be processed slowly due to rate limiting.
 
-**Quick Test:**
-
-<!-- TODO -->
+**Try it now:** https://ioc-risk-assessment.onrender.com/
 
 ## 🔍 Detailed Analysis Results
 
-<!-- TODO -->
+<img src="./frontend/src/assets/details.png" alt="Details Screenshot" width="700">
 
 ## 📋 Example Response
 
 ```
-{
-  "ioc": "malicious-domain.com",
-  "ioc_type": "domain",
-  "risk_score": 75,
-  "risk_level": "HIGH RISK",
-  "sources": [
-    {
-      "source": "VirusTotal",
-      "status": "success",
-      "data": {"positives": 15, "total": 50}
-    }
-  ],
-  "summary": "HIGH RISK - DOMAIN analyzed by 1 source (detected by 15/50 engines) - 75% risk",
-  "timestamp": "2025-01-23T10:30:00Z"
-}
+  {
+    "ioc": "suspicious-example.com",
+    "ioc_type": "domain",
+    "risk_score": 65,
+    "summary": "HIGH RISK - DOMAIN analyzed by 3 sources (detected by 8/70 engines) - 65% risk",
+    "sources": [
+      {"source": "VirusTotal", "status": "success", "data": {"Malicious": "8", "Clean": "55"}},
+      {"source": "AbuseIPDB", "status": "success", "data": {"Abuse Confidence": "75%"}},
+      {"source": "IPInfo", "status": "success", "data": {"Country": "RU", "Organization": "Bulletproof Hosting"}}
+    ]
+  }
 ```
 
 ## 🎯 Risk Scoring Algorithm
@@ -79,3 +72,9 @@ _For detailed scoring logic, see [risk_scoring.py](backend/app/risk_scoring.py)_
 | **MD5**    | `5d41402abc4b2a76b9719d911017c592`         | 32 hex characters            |
 | **SHA1**   | `adc83b19e793491b1c6ea0fd8b46cd9f32e592fc` | 40 hex characters            |
 | **SHA256** | `e3b0c44298fc1c149afbf4c8996fb924...`      | 64 hex characters            |
+
+**Source Coverage:**
+
+- **IP Addresses** - Analyzed by all sources
+- **Domains** - Analyzed by VirusTotal and IPInfo
+- **File hashes** - Analyzed by VirusTotal
