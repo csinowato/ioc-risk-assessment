@@ -124,8 +124,14 @@ const ResultsTable = ({ results, error, expandedRows, onToggleExpansion }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock size={16} className="text-gray-500" />
-            <h2 className="text-lg font-semibold text-gray-900">
+            {/* Desktop: single line title */}
+            <h2 className="hidden md:block text-lg font-semibold text-gray-900">
               Analysis Results ({results.length} IOCs)
+            </h2>
+            {/* Mobile: two line title */}
+            <h2 className="md:hidden text-lg font-semibold text-gray-900">
+              <div>Analysis Results</div>
+              <div>({results.length} IOCs)</div>
             </h2>
           </div>
           <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden" style={{ width: '140px' }}>
