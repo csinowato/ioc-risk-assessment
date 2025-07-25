@@ -58,11 +58,11 @@ const renderSourceData = (sources) => {
             })}
           </div>
         ) : status === "error" ? (
-          <div className="text-sm text-red-600">
+          <div className="text-sm text-red-600 ml-6">
             {source.error || "Failed to fetch data"}
           </div>
         ) : (
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 ml-6">
             No data configuration available for {sourceName}
           </div>
         )}

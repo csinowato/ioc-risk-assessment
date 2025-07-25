@@ -1,5 +1,6 @@
 import asyncio
 import aiohttp
+import socket
 from typing import Optional
 from app.models import SourceResult
 from app.config import settings
@@ -62,7 +63,9 @@ async def query_virustotal(ioc: str, ioc_type: str) -> SourceResult:
                 error=f"Unsupported IOC type: {ioc_type}",
             )
 
-        async with aiohttp.ClientSession() as session:
+        # Set timeout to prevent hanging
+        timeout = aiohttp.ClientTimeout(total=10)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.get(url, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -105,7 +108,9 @@ async def query_abuseipdb(ioc: str, ioc_type: str) -> SourceResult:
         headers = {"Key": settings.ABUSEIPDB_API_KEY, "Accept": "application/json"}
         url = "https://api.abuseipdb.com/api/v2/check"
         params = {"ipAddress": ioc, "maxAgeInDays": 90}
-        async with aiohttp.ClientSession() as session:
+        # Set timeout to prevent hanging
+        timeout = aiohttp.ClientTimeout(total=10)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.get(url, headers=headers, params=params) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -134,25 +139,58 @@ async def query_ipinfo(ioc: str, ioc_type: str) -> SourceResult:
                 error="IPInfo API key not configured",
             )
 
-        # IPInfo supports both IPs and domains so handle unsupported types
-        if ioc_type not in ["ip", "domain"]:
+        # IPInfo only supports IP addresses directly
+        # For domains, we need to resolve it to an IP address first
+        if ioc_type == "domain":
+            try:
+                # Resolve domain to IP address (async to avoid blocking)
+                resolved_ip = await asyncio.to_thread(socket.gethostbyname, ioc)
+                target_ip = resolved_ip
+            except socket.gaierror:
+                return SourceResult(
+                    source="IPInfo",
+                    status="error",
+                    error="Unable to resolve domain to IP address",
+                )
+        elif ioc_type == "ip":
+            target_ip = ioc
+        else:
             return SourceResult(
                 source="IPInfo", status="not_applicable", data=IPINFO_NOT_APPLICABLE
             )
 
-        # IPInfo API integration
+        # IPInfo API integration (only uses IP)
         headers = {"Accept": "application/json"}
-        url = f"https://ipinfo.io/{ioc}/json?token={settings.IPINFO_API_KEY}"
-        async with aiohttp.ClientSession() as session:
+        url = f"https://ipinfo.io/{target_ip}/json?token={settings.IPINFO_API_KEY}"
+
+        # Set timeout to prevent hanging
+        timeout = aiohttp.ClientTimeout(total=10)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.get(url) as response:
                 if response.status == 200:
                     data = await response.json()
+                    # If domain was manually resolved, add the original domain info
+                    if ioc_type == "domain":
+                        data["resolved_from_domain"] = ioc
+                        data["resolved_ip"] = target_ip
                     return SourceResult(source="IPInfo", status="success", data=data)
+                elif response.status == 404:
+                    return SourceResult(
+                        source="IPInfo",
+                        status="error",
+                        error="IP address not found in IPInfo database",
+                    )
+                elif response.status == 429:
+                    return SourceResult(
+                        source="IPInfo",
+                        status="error",
+                        error="IPInfo rate limit exceeded",
+                    )
                 else:
                     return SourceResult(
                         source="IPInfo",
                         status="error",
-                        error=f"API returned {response.status}",
+                        error=f"IPInfo API error: {response.status}",
                     )
 
 
