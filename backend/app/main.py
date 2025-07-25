@@ -28,9 +28,9 @@ app.add_middleware(
 app.include_router(router, prefix="/api")
 
 
-# Root endpoint
-@app.get("/")
-async def root():
+# API info endpoint
+@app.get("/api/info")
+async def info():
     return {
         "message": f"Welcome to {settings.PROJECT_NAME}",
         "version": settings.VERSION,
