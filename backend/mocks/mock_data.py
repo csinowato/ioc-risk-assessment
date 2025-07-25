@@ -36,24 +36,28 @@ VT_CLEAN_RESPONSE = {
 
 # AbuseIPDB mock responses
 ABUSEIPDB_MALICIOUS_RESPONSE = {
-    "abuseConfidenceScore": 85,
-    "countryCode": "US",
-    "usageType": "Data Center/Web Hosting/Transit",
-    "isp": "Example ISP",
-    "totalReports": 12,
-    "numDistinctUsers": 8,
+    "data": {
+        "abuseConfidenceScore": 85,
+        "countryCode": "US",
+        "usageType": "Data Center/Web Hosting/Transit",
+        "isp": "Example ISP",
+        "totalReports": 12,
+        "numDistinctUsers": 8,
+    }
 }
 
 ABUSEIPDB_CLEAN_RESPONSE = {
-    "abuseConfidenceScore": 0,
-    "countryCode": "US",
-    "usageType": "Data Center/Web Hosting/Transit",
-    "isp": "Example ISP",
-    "totalReports": 0,
-    "numDistinctUsers": 0,
+    "data": {
+        "abuseConfidenceScore": 0,
+        "countryCode": "US",
+        "usageType": "Data Center/Web Hosting/Transit",
+        "isp": "Example ISP",
+        "totalReports": 0,
+        "numDistinctUsers": 0,
+    }
 }
 
-ABUSEIPDB_NOT_APPLICABLE = {"message": "AbuseIPDB only supports IP addresses"}
+ABUSEIPDB_NOT_APPLICABLE = {"data": {"message": "AbuseIPDB only supports IP addresses"}}
 
 # IPInfo mock responses
 IPINFO_IP_RESPONSE = {

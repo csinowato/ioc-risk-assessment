@@ -66,25 +66,30 @@ const SOURCE_FIELD_CONFIGS = {
   AbuseIPDB: {
     fields: [
       {
-        key: "abuseConfidenceScore",
+        key: "data.abuseConfidenceScore",
         label: "Abuse Confidence",
         type: "percentage",
         required: true,
       },
       {
-        key: "totalReports",
+        key: "data.totalReports",
         label: "Total Reports",
         type: "number",
         required: true,
       },
       {
-        key: "lastReportedAt",
+        key: "data.lastReportedAt",
         label: "Last Reported",
         type: "date",
         required: false,
       },
-      { key: "countryCode", label: "Country", type: "string", required: false },
-      { key: "isp", label: "ISP", type: "string", required: false },
+      {
+        key: "data.countryCode",
+        label: "Country",
+        type: "string",
+        required: false,
+      },
+      { key: "data.isp", label: "ISP", type: "string", required: false },
     ],
   },
   IPInfo: {
